@@ -1,0 +1,6 @@
+Create Table public.people(
+	P_ID VARCHAR(37) PRIMARY KEY, 
+	P_NAME VARCHAR(32),
+	P_SURNAME VARCHAR(32),
+	P_EYECOLOR VARCHAR(32),
+)

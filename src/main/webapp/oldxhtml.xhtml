@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/XHtml.xhtml to edit this template
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
+    <h:head>
+        <title>The boys</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </h:head>
+    <h:body>
+        <h:form id="inputField">
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="New" 
+                                     icon="pi pi-plus" 
+                                     actionListener="#{tableWorker.openNew}"
+                                     update=":inputField:manage-person-content" 
+                                     oncomplete="PF('PersonalInput').show()"
+                                     styleClass="ui-button-success" 
+                                     style="margin-right: .5rem" >
+                        <p:resetInput target="manage-person-content" />
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dialog header="Person Info" 
+                      showEffect="fade" 
+                      modal="true" 
+                      widgetVar="PersonalInput"
+                      responsive="true">
+                <p:outputPanel id="manage-person-content">
+                    <p:outputPanel rendered="#{not empty tableWorker.selectedPeople}">
+                        <h:panelGrid id="eventDetails" columns="2" cellpadding="7">
+                            <p:outputLabel for="name1">Имя</p:outputLabel>
+                            <p:inputText id="name1" value="#{tableWorker.selectedPeople.name}" required="true" />
+                            <p:outputLabel for="name2">Второе имя</p:outputLabel>
+                            <p:inputText id="name2" value="#{tableWorker.selectedPeople.surname}" required="true" />
+                            <p:outputLabel for="name3">Газа</p:outputLabel>
+                            <p:inputText id="name3" value="#{tableWorker.selectedPeople.eyeColor}" required="true" />
+                        </h:panelGrid>
+                    </p:outputPanel>
+                </p:outputPanel>
+                <f:facet name="footer">
+                    <p:commandButton value="Save" 
+                                     icon="pi pi-check" 
+                                     actionListener="#{tableWorker.savePeople}"
+                                     update="manage-person-content" 
+                                     process="manage-person-content @this" 
+                                     onclick="PF('PersonalInput').hide()" />
+                    <p:commandButton value="Cancel" 
+                                     icon="pi pi-times" 
+                                     onclick="PF('PersonalInput').hide()"
+                                     class="ui-button-secondary" 
+                                     type="button" />
+                </f:facet>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="tableInf">
+            <p:growl id="growl" showDetail="true" />
+            <p:dataTable id="peoples" 
+                         var="people" 
+                         value="#{tableWorker.peoples}" 
+                         rowKey="#{people.id}" 
+                         selection="#{tableWorker.selectedPeople}" 
+                         selectionMode="single">
+               
+                <p:column headerText="Имя" sortBy="#{people.name}">
+                    <h:outputText value="#{people.name}" />
+                </p:column>
+                <p:column headerText="Фамилия" sortBy="#{people.surname}">
+                    <h:outputText value="#{people.surname}"/>
+                </p:column>
+                <p:column headerText="Цвет глаз" sortBy="#{people.eyeColor}">
+                    <h:outputText value="#{people.eyeColor}" />     
+                </p:column>
+                <p:column exportable="false" ariaHeaderText="Actions">
+                    <p:commandButton icon="pi pi-pencil" 
+                                     update=":inputField:manage-person-content"
+                                     oncomplete="PF('PersonalInput').show()"
+                                     styleClass="edit-button rounded-button ui-button-success" 
+                                     process="@this">
+                        <f:setPropertyActionListener value="#{people}" 
+                                                     target="#{tableWorker.selectedPeople}" />
+                        <p:resetInput target=":inputField:manage-person-content" />
+                    </p:commandButton>
+                    <p:commandButton class="ui-button-warning rounded-button" 
+                                     icon="pi pi-trash"
+                                     process="@this"
+                                     oncomplete="PF('deletePeopleDialog').show()">
+                        <f:setPropertyActionListener value="#{people}" 
+                                                     target="#{tableWorker.selectedPeople}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+
+            <p:contextMenu for="peoples">
+                <p:menuitem value="View"  
+                            icon="pi pi-search" 
+                            update="Info"
+                            oncomplete="PF('Personal').show()" 
+                            actionListener="#{tableWorker.viewPeople}"/>
+                <p:menuitem value="Delete" 
+                            update="peoples" 
+                            icon="pi pi-times"
+                            action="#{tableWorker.deletePeople}"/>
+            </p:contextMenu>
+
+            <p:dialog header="Person Info" 
+                      widgetVar="Personal" 
+                      modal="true" 
+                      showEffect="fade"
+                      hideEffect="fade" 
+                      resizable="false">
+                <p:outputPanel id="Info">
+                    <h:panelGrid id="eventDetails" columns="1" cellpadding="7">                      
+                        <p:outputLabel  value="Имя: #{tableWorker.selectedPeople.name}" styleClass="font-bold"/>
+                        <p:outputLabel  value="Второе имя: #{tableWorker.selectedPeople.surname}" styleClass="font-bold"/>
+                        <p:outputLabel  value="Газа: #{tableWorker.selectedPeople.eyeColor}" styleClass="font-bold"/>
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+            <p:confirmDialog widgetVar="deletePeopleDialog" 
+                             showEffect="fade" 
+                             width="300"
+                             message="Удалить человека?" 
+                             header="Confirm" 
+                             severity="warn">
+
+                <p:commandButton value="Yes" 
+                                 icon="pi pi-check" 
+                                 actionListener="#{tableWorker.deletePeople}"
+                                 process="@this" 
+                                 update=":tableInf:growl"
+                                 oncomplete="PF('deletePeopleDialog').hide()" />
+
+                <p:commandButton value="No" 
+                                 type="button" 
+                                 styleClass="ui-button-secondary" 
+                                 icon="pi pi-times"
+                                 onclick="PF('deleteProductDialog').hide()" />
+            </p:confirmDialog>
+        </h:form>
+    </h:body>  
+</html>
